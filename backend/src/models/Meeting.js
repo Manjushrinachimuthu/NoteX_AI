@@ -29,6 +29,15 @@ const meetingSchema = new mongoose.Schema({
     enum: ['scheduled', 'active', 'completed'],
     default: 'scheduled'
   },
+  meetingType: {
+    type: String,
+    enum: ['live', 'uploaded'],
+    default: 'live'
+  },
+  videoUrl: {
+    type: String,
+    default: null
+  },
   duration: {
     type: Number,
     default: 0

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { usersMap } = require('../config/dataStore');
 
 const protect = async (req, res, next) => {
   let token;
@@ -8,11 +8,25 @@ const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select('-password');
+      
+      let user = null;
+      for (const u of usersMap.values()) {
+        if (u._id === decoded.id) {
+          user = u;
+          break;
+        }
+      }
 
-      if (!req.user) {
+      if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
+
+      req.user = {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        preferredLanguage: user.preferredLanguage
+      };
 
       next();
     } catch (error) {

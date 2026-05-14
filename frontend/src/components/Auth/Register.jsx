@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 const Register = () => {
@@ -10,14 +10,15 @@ const Register = () => {
   const [loading, setLoading] = useState(false)
 
   const { register } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     try {
       await register(name, email, password)
+      navigate('/')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -28,8 +29,13 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>Create Account</h1>
-        <p className="subtitle">Join NoteX AI today</p>
+        <div className="auth-logo">
+          <div className="auth-logo-icon">🧠</div>
+          <span className="auth-logo-text">NoteX AI</span>
+        </div>
+
+        <h1>Create account</h1>
+        <p className="subtitle">Start capturing smarter meetings</p>
 
         {error && <div className="error-message">{error}</div>}
 
@@ -40,7 +46,7 @@ const Register = () => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
+              placeholder="Your full name"
               required
             />
           </div>
@@ -51,7 +57,7 @@ const Register = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               required
             />
           </div>
@@ -62,17 +68,17 @@ const Register = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a password"
+              placeholder="Create a strong password"
               required
             />
           </div>
 
           <button type="submit" className="primary" disabled={loading}>
-            {loading ? 'Creating account...' : 'Register'}
+            {loading ? 'Creating account…' : 'Get Started'}
           </button>
 
           <p className="switch">
-            Already have an account? <Link to="/login">Sign In</Link>
+            Already have an account? <Link to="/login">Sign in</Link>
           </p>
         </form>
       </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 const Login = () => {
@@ -9,14 +9,15 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
 
   const { login } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     try {
       await login(email, password)
+      navigate('/')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -27,8 +28,13 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>Welcome Back</h1>
-        <p className="subtitle">Sign in to NoteX AI</p>
+        <div className="auth-logo">
+          <div className="auth-logo-icon">🧠</div>
+          <span className="auth-logo-text">NoteX AI</span>
+        </div>
+
+        <h1>Welcome back</h1>
+        <p className="subtitle">Sign in to your account</p>
 
         {error && <div className="error-message">{error}</div>}
 
@@ -39,7 +45,7 @@ const Login = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               required
             />
           </div>
@@ -50,17 +56,17 @@ const Login = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="••••••••"
               required
             />
           </div>
 
           <button type="submit" className="primary" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Signing in…' : 'Sign In'}
           </button>
 
           <p className="switch">
-            Don't have an account? <Link to="/register">Register</Link>
+            No account? <Link to="/register">Create one</Link>
           </p>
         </form>
       </div>

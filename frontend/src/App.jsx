@@ -5,6 +5,7 @@ import Register from './components/Auth/Register'
 import Dashboard from './components/Dashboard/Dashboard'
 import MeetingRoom from './components/Meeting/MeetingRoom'
 import NotesViewer from './components/Notes/NotesViewer'
+import HomePage from './components/Home/HomePage'
 import './App.css'
 
 function App() {
@@ -22,12 +23,17 @@ function App() {
   return (
     <div className="app">
       <Routes>
-        <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
-        <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" />} />
+        {/* Public landing page — always accessible */}
+        <Route path="/" element={<HomePage />} />
+
+        {/* Auth routes — redirect to home if already logged in */}
+        <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+        <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+
+        {/* Protected routes */}
         <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
         <Route path="/meeting/:meetingId" element={user ? <MeetingRoom /> : <Navigate to="/login" />} />
         <Route path="/notes/:meetingId" element={user ? <NotesViewer /> : <Navigate to="/login" />} />
-        <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
       </Routes>
     </div>
   )

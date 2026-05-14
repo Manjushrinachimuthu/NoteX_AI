@@ -4,18 +4,27 @@ const CreateMeetingModal = ({ onClose, onCreate }) => {
   const [title, setTitle] = useState('')
   const [scheduledTime, setScheduledTime] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
     setLoading(true)
-    await onCreate(title, scheduledTime || null)
-    setLoading(false)
+    try {
+      await onCreate(title, scheduledTime || null)
+    } catch (err) {
+      setError(err.message || 'Failed to create meeting')
+      setLoading(false)
+    }
   }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <h2>Create New Meeting</h2>
+        <p className="modal-subtitle">Set a title and optionally schedule it</p>
+
+        {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -24,8 +33,9 @@ const CreateMeetingModal = ({ onClose, onCreate }) => {
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              placeholder="Enter meeting title"
+              placeholder="e.g. Weekly Standup"
               required
+              autoFocus
             />
           </div>
 
@@ -39,11 +49,11 @@ const CreateMeetingModal = ({ onClose, onCreate }) => {
           </div>
 
           <div className="modal-actions">
-            <button type="button" className="secondary" onClick={onClose}>
+            <button type="button" className="secondary" onClick={onClose} disabled={loading}>
               Cancel
             </button>
             <button type="submit" className="primary" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Meeting'}
+              {loading ? 'Creating…' : 'Create Meeting'}
             </button>
           </div>
         </form>

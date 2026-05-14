@@ -2,9 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
-const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const meetingRoutes = require('./routes/meetings');
 const noteRoutes = require('./routes/notes');
@@ -12,6 +13,11 @@ const { setupSocketHandlers } = require('./services/socketService');
 
 const app = express();
 const server = http.createServer(app);
+
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 const io = new Server(server, {
   cors: {
@@ -23,8 +29,7 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-connectDB();
+app.use('/uploads', express.static(uploadsDir));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/meetings', meetingRoutes);

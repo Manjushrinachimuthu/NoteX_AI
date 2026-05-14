@@ -13,6 +13,11 @@ export default defineConfig({
       '/socket.io': {
         target: 'http://localhost:5000',
         ws: true
+      },
+      '/ai': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ai/, '')
       }
     }
   }

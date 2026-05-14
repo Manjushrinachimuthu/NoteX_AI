@@ -1,7 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const Note = require('../models/Note');
-const Meeting = require('../models/Meeting');
+const { notes, meetings } = require('../config/dataStore');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -10,16 +9,15 @@ const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
 router.get('/:meetingId', protect, async (req, res) => {
   try {
-    let note = await Note.findOne({ meetingId: req.params.meetingId })
-      .populate('meetingId');
+    let note = notes.findByMeetingId(req.params.meetingId)[0];
 
     if (!note) {
-      const meeting = await Meeting.findById(req.params.meetingId);
+      const meeting = meetings.findById(req.params.meetingId);
       if (!meeting) {
         return res.status(404).json({ message: 'Meeting not found' });
       }
 
-      note = await Note.create({
+      note = notes.create({
         meetingId: req.params.meetingId,
         transcript: [],
         summary: {}
@@ -37,10 +35,10 @@ router.post('/:meetingId/transcript', protect, async (req, res) => {
   try {
     const { transcript } = req.body;
 
-    let note = await Note.findOne({ meetingId: req.params.meetingId });
+    let note = notes.findByMeetingId(req.params.meetingId)[0];
 
     if (!note) {
-      note = await Note.create({
+      note = notes.create({
         meetingId: req.params.meetingId,
         transcript: [],
         summary: {}
@@ -54,7 +52,7 @@ router.post('/:meetingId/transcript', protect, async (req, res) => {
         timestamp: new Date(),
         language: transcript.language || 'en'
       });
-      await note.save();
+      notes.update(note._id, { transcript: note.transcript });
     }
 
     res.json(note);
@@ -66,7 +64,7 @@ router.post('/:meetingId/transcript', protect, async (req, res) => {
 
 router.post('/:meetingId/summary', protect, async (req, res) => {
   try {
-    const note = await Note.findOne({ meetingId: req.params.meetingId });
+    const note = notes.findByMeetingId(req.params.meetingId)[0];
 
     if (!note) {
       return res.status(404).json({ message: 'Notes not found' });
@@ -86,8 +84,8 @@ router.post('/:meetingId/summary', protect, async (req, res) => {
     });
 
     if (response.data && response.data.summary) {
+      notes.update(note._id, { generatedSummary: response.data.summary });
       note.generatedSummary = response.data.summary;
-      await note.save();
     }
 
     res.json({ summary: note.generatedSummary });
@@ -101,31 +99,42 @@ router.post('/:meetingId/translate', protect, async (req, res) => {
   try {
     const { targetLanguage } = req.body;
 
-    const note = await Note.findOne({ meetingId: req.params.meetingId });
+    const note = notes.findByMeetingId(req.params.meetingId)[0];
+    if (!note) return res.status(404).json({ message: 'Notes not found' });
 
-    if (!note) {
-      return res.status(404).json({ message: 'Notes not found' });
+    const JUNK_RE = /^\[Set GROQ|^\[Transcription unavailable|^\[Whisper/i;
+    const cleanEntries = note.transcript.filter(t => t?.text && !JUNK_RE.test(t.text));
+
+    if (cleanEntries.length === 0) {
+      return res.json({ entries: [], language: targetLanguage });
     }
 
-    const transcriptText = note.transcript
-      .map(t => t.text)
-      .join('\n');
+    // Send all lines in ONE bulk call — avoids rate limits from N individual calls
+    const lines = cleanEntries.map(e => e.text);
 
-    const response = await axios.post(`${AI_SERVICE_URL}/translate`, {
-      text: transcriptText,
+    const response = await axios.post(`${AI_SERVICE_URL}/translate-bulk`, {
+      lines,
       target_language: targetLanguage,
       source_language: 'auto'
     });
 
-    if (response.data && response.data.translated) {
-      note.translations.set(targetLanguage, response.data.translated);
-      await note.save();
-    }
+    const translatedLines = response.data?.translated_lines || lines;
 
-    res.json({ translated: response.data.translated, language: targetLanguage });
+    // Map translated lines back to original entry structure
+    const translatedEntries = cleanEntries.map((entry, i) => ({
+      ...entry,
+      text: translatedLines[i] || entry.text
+    }));
+
+    // Cache
+    const translations = note.translations || {};
+    translations[targetLanguage] = translatedLines.join('\n');
+    notes.update(note._id, { translations });
+
+    res.json({ entries: translatedEntries, language: targetLanguage });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Translation failed' });
+    console.error('Translation error:', error.message);
+    res.status(500).json({ message: 'Translation failed: ' + error.message });
   }
 });
 
@@ -133,7 +142,7 @@ router.post('/:meetingId/chatbot', protect, async (req, res) => {
   try {
     const { question } = req.body;
 
-    const note = await Note.findOne({ meetingId: req.params.meetingId });
+    const note = notes.findByMeetingId(req.params.meetingId)[0];
 
     if (!note) {
       return res.status(404).json({ message: 'Notes not found' });
