@@ -1,4 +1,5 @@
-<img width="1911" height="1010" alt="Screenshot 2026-05-14 233224" src="https://github.com/user-attachments/assets/88dac5e4-3756-4249-b020-7738c0f07305" />
+<img width="1919" height="988" alt="Screenshot 2026-05-14 233400" src="https://github.com/user-attachments/assets/635266a5-7cde-4434-bebb-ca9fdc142df4" />
+
 # 🧠 NoteX AI — Smart Meeting Assistant
 
 <div align="center">
