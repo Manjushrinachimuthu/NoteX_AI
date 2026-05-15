@@ -1,4 +1,4 @@
-🌐 Live Demo → note-x-ai-gamma.vercel.app
+# **🌐 Live Demo → note-x-ai-gamma.vercel.app**
 <img width="1919" height="988" alt="Screenshot 2026-05-14 233400" src="https://github.com/user-attachments/assets/635266a5-7cde-4434-bebb-ca9fdc142df4" />
 
 # 🧠 NoteX AI — Smart Meeting Assistant
