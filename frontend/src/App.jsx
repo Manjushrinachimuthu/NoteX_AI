@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard/Dashboard'
 import MeetingRoom from './components/Meeting/MeetingRoom'
 import NotesViewer from './components/Notes/NotesViewer'
 import HomePage from './components/Home/HomePage'
+import FloatingIcons from './components/FloatingIcons'
 import './App.css'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
 
   return (
     <div className="app">
+      <FloatingIcons />
       <Routes>
         {/* Public landing page — always accessible */}
         <Route path="/" element={<HomePage />} />

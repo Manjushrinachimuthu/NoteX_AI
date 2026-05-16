@@ -1,0 +1,36 @@
+.floating-icons-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.floating-icon {
+  position: absolute;
+  animation:
+    floatUpDown var(--dur, 24s) ease-in-out infinite alternate,
+    floatRotate var(--rot-dur, 36s) linear infinite;
+  transform: rotate(var(--init-rotate, 0deg));
+  will-change: transform;
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.03));
+}
+
+.floating-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@keyframes floatUpDown {
+  0%   { transform: rotate(var(--init-rotate, 0deg)) translateY(0px)   translateX(0px); }
+  25%  { transform: rotate(var(--init-rotate, 0deg)) translateY(-18px)  translateX(8px); }
+  50%  { transform: rotate(var(--init-rotate, 0deg)) translateY(-8px)   translateX(-10px); }
+  75%  { transform: rotate(var(--init-rotate, 0deg)) translateY(-22px)  translateX(5px); }
+  100% { transform: rotate(var(--init-rotate, 0deg)) translateY(-12px)  translateX(-6px); }
+}
+
+@keyframes floatRotate {
+  from { transform: rotate(var(--init-rotate, 0deg)); }
+  to   { transform: rotate(calc(var(--init-rotate, 0deg) + 360deg)); }
+}

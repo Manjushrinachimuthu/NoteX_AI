@@ -69,12 +69,7 @@ export default function HomePage() {
 
   return (
     <div className="home">
-      {/* ── Ambient orbs ── */}
-      <div className="home-orb home-orb-1" />
-      <div className="home-orb home-orb-2" />
-      <div className="home-orb home-orb-3" />
-
-      {/* ════════════ NAV ════════════ */}
+      {/* ── Nav ── */}
       <nav className="home-nav">
         <div className="home-nav-inner">
           <div className="home-nav-logo">
